@@ -1,0 +1,37 @@
+# --- PYTHON ---
+__pycache__/
+*.py[cod]
+*.pyc
+ 
+# --- IDE (VS CODE) ---
+.vscode/
+.idea/
+ 
+# --- ENVIRONNEMENT VIRTUEL ---
+.venv/
+venv/
+env/
+ 
+# --- FICHIERS DE CONFIGURATION ---
+# J'ai corrigé le chemin ici (c'est src/config.py, pas src/ui/config.py)
+src/config.py
+.env
+ 
+# --- DONNÉES (DATA) ---
+# Ignore tout le contenu des dossiers data...
+data/raw/*
+data/processed/*
+# ... Sauf les fichiers .gitkeep (pour garder les dossiers vides sur git)
+!data/raw/.gitkeep
+!data/processed/.gitkeep
+# Ignore les CSV partout
+*.csv
+ 
+# --- JUPYTER ---
+.ipynb_checkpoints
+*/.ipynb_checkpoints/*
+ 
+# --- SYSTÈME ---
+.DS_Store
+Thumbs.db
+ 
