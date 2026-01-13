@@ -29,7 +29,7 @@ def load_movies():
 
 def main():
     st.set_page_config(page_title="Movie Reco (SBERT + Ollama)", layout="wide")
-    st.title("🎬 Recommandation de films — SBERT + Ollama")
+    st.title("🎬 Recommandation de films")
 
     df = load_movies()
     model = get_model()
@@ -64,7 +64,7 @@ Explique pourquoi ces films correspondent au profil (3–5 phrases chacun),
 puis dresse un court profil cinéphile de l’utilisateur (2–3 phrases).
 """
 
-        st.subheader("🧠 Explication GenAI (Ollama)")
+        st.subheader("Explication GenAI")
         st.write(generate_text(prompt))
 
 
