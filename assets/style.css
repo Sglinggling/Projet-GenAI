@@ -141,7 +141,7 @@ section[data-testid="stSidebar"] label {
     font-weight: bold;
 }
 
-/* --- 5. L'AVIS EXPERT (FORCE H1/H3) --- */
+/* --- 5. L'AVIS EXPERT (Corrigé pour Markdown) --- */
 .explain-wrap {
     background-color: #1a1a1a;
     padding: 40px;
@@ -152,33 +152,48 @@ section[data-testid="stSidebar"] label {
     margin-top: 20px;
 }
 
-/* ON FORCE LA TAILLE AVEC 'div.explain-wrap h1' */
+/* TITRES H1 (ex: VOTRE PROFIL, NOTRE SÉLECTION) */
 div.explain-wrap h1 {
     color: #ffffff !important;
-    font-size: 36px !important; /* TRES GROS */
+    font-size: 36px !important;
     font-family: 'Oswald', sans-serif !important;
     font-weight: 700 !important;
+    text-transform: uppercase;
+    margin-top: 0px !important;
     margin-bottom: 25px !important;
     border-bottom: 1px solid #444;
     padding-bottom: 15px;
-    margin-top: 10px;
+    line-height: 1.2;
+}
+
+/* TITRES H3 (ex: TITRES DES FILMS) */
+div.explain-wrap h3 {
+    color: #e50914 !important;
+    font-size: 24px !important;
+    font-family: 'Oswald', sans-serif !important;
+    font-weight: 500 !important;
+    margin-top: 30px !important;
+    margin-bottom: 10px !important;
+    letter-spacing: 0.5px;
     text-transform: uppercase;
 }
 
-div.explain-wrap h3 {
-    color: #e50914 !important;
-    font-size: 24px !important; /* TITRES FILMS */
-    font-family: 'Oswald', sans-serif !important;
-    margin-top: 40px;
-    margin-bottom: 10px;
-    letter-spacing: 0.5px;
+/* PARAGRAPHES DE TEXTE */
+div.explain-wrap p {
+    font-size: 18px !important;
+    line-height: 1.6;
+    color: #cccccc;
+    margin-bottom: 15px;
 }
 
-div.explain-wrap p {
-    font-size: 18px !important; /* TEXTE LISIBLE */
-    line-height: 1.8;
-    color: #cccccc;
-    margin-bottom: 20px;
+/* LISTES (Au cas où l'IA en génère) */
+div.explain-wrap ul, div.explain-wrap ol {
+    margin-left: 20px;
+    color: #ccc;
+    margin-bottom: 15px;
+}
+div.explain-wrap li {
+    margin-bottom: 5px;
 }
 
 /* --- 6. TITRES SECTIONS --- */

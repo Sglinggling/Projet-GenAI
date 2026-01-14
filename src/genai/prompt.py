@@ -1,4 +1,3 @@
-# src/genai/prompts.py
 import pandas as pd
 
 def build_genai_prompt(user_profile: str, top3: pd.DataFrame) -> str:
@@ -11,23 +10,32 @@ def build_genai_prompt(user_profile: str, top3: pd.DataFrame) -> str:
             for rank, (_, row) in enumerate(top3.iterrows(), start=1)
         ]
     )
- 
+
     return f"""
-Tu es un expert en recommandation de films.
-Analyse le profil et recommande ces 3 films.
- 
-PROFIL :
+Tu es un expert critique de cinéma. Ton but est de recommander ces films de manière percutante.
+
+PROFIL UTILISATEUR :
 {user_profile}
- 
-FILMS :
+
+FILMS SELECTIONNÉS :
 {films_txt}
- 
-FORMAT (MARKDOWN) :
-1. Titre H1 (#) : "Votre Profil". (2 phrases max)
-2. Titre H1 (#) : "Notre Sélection".
-3. Pour chaque film, Titre H3 (###) : Titre du film (Année).
-4. Sous chaque film : Un paragraphe explicatif clair et lisible.
-5. Pas de numérotation automatique.
- 
-Ton : Expert, élégant, direct.
+
+CONSIGNES DE RÉPONSE (RESPECTE STRICTEMENT CE FORMAT MARKDOWN) :
+Ne mets pas d'introduction (pas de "Voici ma sélection"). Commence direct.
+
+# VOTRE PROFIL
+(Ici, une analyse rapide du profil cinéphile en 2 phrases).
+
+# NOTRE SÉLECTION
+
+### {top3.iloc[0]['Series_Title']} ({top3.iloc[0]['Released_Year']})
+(Paragraphe vendeur expliquant pourquoi ce film matche le profil).
+
+### {top3.iloc[1]['Series_Title']} ({top3.iloc[1]['Released_Year']})
+(Paragraphe vendeur...).
+
+### {top3.iloc[2]['Series_Title']} ({top3.iloc[2]['Released_Year']})
+(Paragraphe vendeur...).
+
+Ton : Expert, élégant, direct. Pas de listes à puces.
 """.strip()
