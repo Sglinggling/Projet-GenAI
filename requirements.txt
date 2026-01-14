@@ -1,0 +1,9 @@
+streamlit
+pandas
+numpy
+plotly
+sentence-transformers
+torch
+requests
+markdown
+huggingface_hub

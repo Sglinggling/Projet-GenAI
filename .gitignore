@@ -1,37 +1,33 @@
 # --- PYTHON ---
-__pycache__/
+**/__pycache__/
 *.py[cod]
-*.pyc
- 
-# --- IDE (VS CODE) ---
+*$py.class
+
+# --- IDE & SYSTÈME ---
 .vscode/
 .idea/
- 
-# --- ENVIRONNEMENT VIRTUEL ---
+.DS_Store
+Thumbs.db
+
+# --- ENVIRONNEMENT ---
 .venv/
 venv/
 env/
- 
-# --- FICHIERS DE CONFIGURATION ---
-# J'ai corrigé le chemin ici (c'est src/config.py, pas src/ui/config.py)
-src/config.py
 .env
- 
-# --- DONNÉES (DATA) ---
-# Ignore tout le contenu des dossiers data...
-data/raw/*
-data/processed/*
-# ... Sauf les fichiers .gitkeep (pour garder les dossiers vides sur git)
-!data/raw/.gitkeep
-!data/processed/.gitkeep
-# Ignore les CSV partout
+
+# --- DATA (Gestion fine) ---
+# 1. On ignore tous les CSV par défaut...
 *.csv
- 
-# --- JUPYTER ---
-.ipynb_checkpoints
-*/.ipynb_checkpoints/*
- 
-# --- SYSTÈME ---
-.DS_Store
-Thumbs.db
- 
+# 2. ...MAIS on force l'inclusion de TON dataset principal :
+!src/data/raw/imdb_movies.csv
+!data/raw/imdb_movies.csv
+
+# 3. On ignore le contenu des dossiers processed
+data/processed/*
+src/data/processed/*
+# (On garde les .gitkeep s'il y en a pour garder la structure des dossiers)
+!data/processed/.gitkeep
+
+# --- CACHE APPLI ---
+# On ignore le cache JSON de l'IA (genai_cache.json)
+*.json

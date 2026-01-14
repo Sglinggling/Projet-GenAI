@@ -1,0 +1,194 @@
+/* --- IMPORTS FONTS --- */
+@import url('https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;700&family=Lato:wght@300;400;700&display=swap');
+
+/* --- 1. CONFIGURATION GÉNÉRALE --- */
+.stApp {
+    background-color: #141414;
+    color: #e5e5e5;
+    font-family: 'Lato', sans-serif;
+}
+
+h1, h2, h3 {
+    font-family: 'Oswald', sans-serif !important;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* --- 2. SIDEBAR (Renforcé) --- */
+section[data-testid="stSidebar"] {
+    background-color: #000000;
+    border-right: 1px solid #222;
+}
+
+/* TITRES PRINCIPAUX SIDEBAR (ex: VOS CRITÈRES) */
+section[data-testid="stSidebar"] h2 {
+    color: #fff !important;
+    font-family: 'Oswald', sans-serif !important;
+    font-size: 28px !important; /* ENCORE PLUS GROS */
+    font-weight: 700 !important;
+    margin-bottom: 25px !important;
+    border-bottom: 2px solid #e50914; /* Petit soulignement rouge */
+    padding-bottom: 10px;
+}
+
+/* LABELS DES INPUTS (ex: Décrivez votre envie...) */
+section[data-testid="stSidebar"] label {
+    font-family: 'Oswald', sans-serif !important;
+    font-size: 18px !important; /* PLUS GROS */
+    color: #e50914 !important;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: 500 !important;
+}
+
+/* INPUTS : ZONE DE SAISIE */
+.stTextArea textarea {
+    background-color: #1a1a1a !important;
+    border: 1px solid #333 !important;
+    color: #fff !important;
+    font-size: 16px !important;
+    border-radius: 4px;
+    min-height: 250px !important;
+}
+.stTextArea textarea:focus {
+    border-color: #e50914 !important;
+    box-shadow: none !important;
+}
+
+/* BOUTON LANCER */
+.stButton button {
+    background-color: #e50914 !important;
+    color: white !important;
+    border: none !important;
+    font-weight: 700 !important;
+    text-transform: uppercase;
+    padding: 18px 0 !important;
+    font-size: 22px !important; /* TRES GROS */
+    border-radius: 4px;
+    transition: transform 0.2s, background 0.2s;
+    margin-top: 20px;
+}
+.stButton button:hover {
+    background-color: #f40612 !important;
+    transform: scale(1.02);
+}
+
+/* --- 3. LOGO TEXTE --- */
+.logo-container {
+    text-align: center;
+    margin-bottom: 40px;
+    margin-top: 10px;
+}
+.logo-text {
+    font-family: 'Impact', sans-serif;
+    font-size: 80px;
+    line-height: 1;
+    letter-spacing: 1px;
+}
+.logo-white { color: #ffffff; }
+.logo-red { color: #e50914; }
+.logo-subtitle {
+    color: #888;
+    font-size: 18px;
+    font-style: italic;
+    margin-top: 5px;
+}
+
+/* --- 4. CARTES DE FILMS --- */
+.movie-card {
+    background-color: #181818;
+    padding: 20px;
+    border-radius: 6px;
+    height: 100%;
+    border: 1px solid #333;
+    transition: transform 0.2s ease, border-color 0.2s ease;
+}
+.movie-card:hover {
+    transform: scale(1.02);
+    border-color: #e50914;
+    background-color: #1f1f1f;
+}
+
+.rank-pill {
+    color: #e50914;
+    font-weight: 700;
+    font-size: 1.8rem;
+    font-family: 'Oswald', sans-serif;
+    margin-bottom: 5px;
+}
+.movie-title {
+    font-family: 'Oswald', sans-serif;
+    font-size: 20px;
+    color: #fff;
+    margin-bottom: 5px;
+    line-height: 1.3;
+}
+.chip {
+    background-color: #333;
+    color: #ccc;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    margin-right: 5px;
+}
+.chip-rating {
+    border: 1px solid #e50914;
+    color: #e50914;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    font-weight: bold;
+}
+
+/* --- 5. L'AVIS EXPERT (FORCE H1/H3) --- */
+.explain-wrap {
+    background-color: #1a1a1a;
+    padding: 40px;
+    border-radius: 8px;
+    border-left: 5px solid #e50914;
+    font-family: 'Lato', sans-serif;
+    color: #ddd;
+    margin-top: 20px;
+}
+
+/* ON FORCE LA TAILLE AVEC 'div.explain-wrap h1' */
+div.explain-wrap h1 {
+    color: #ffffff !important;
+    font-size: 36px !important; /* TRES GROS */
+    font-family: 'Oswald', sans-serif !important;
+    font-weight: 700 !important;
+    margin-bottom: 25px !important;
+    border-bottom: 1px solid #444;
+    padding-bottom: 15px;
+    margin-top: 10px;
+    text-transform: uppercase;
+}
+
+div.explain-wrap h3 {
+    color: #e50914 !important;
+    font-size: 24px !important; /* TITRES FILMS */
+    font-family: 'Oswald', sans-serif !important;
+    margin-top: 40px;
+    margin-bottom: 10px;
+    letter-spacing: 0.5px;
+}
+
+div.explain-wrap p {
+    font-size: 18px !important; /* TEXTE LISIBLE */
+    line-height: 1.8;
+    color: #cccccc;
+    margin-bottom: 20px;
+}
+
+/* --- 6. TITRES SECTIONS --- */
+.section-title {
+    font-size: 32px;
+    font-family: 'Oswald', sans-serif;
+    margin-top: 70px;
+    margin-bottom: 30px;
+    color: #fff;
+    border-left: 6px solid #e50914;
+    padding-left: 20px;
+    text-transform: uppercase;
+}
