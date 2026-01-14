@@ -266,7 +266,7 @@ def main():
     st.caption("Détails techniques")
  
     with st.expander("Comment ça marche"):
-        st.write("Embedding SBERT + Cosine Similarity + Ollama GenAI.")
+        st.write("L'application encode la requête utilisateur et les descriptions narratives dans les films avec SBERT, puis calcule une similarité cosinus pour obtenir un score d'affinité. Les trois meilleurs films sont proposés. La GenAI génère ensuite une justification et un profil cinéphile.")
  
     with st.expander("Voir la requête sémantique"):
         st.code(query_text)
