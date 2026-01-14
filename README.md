@@ -11,7 +11,7 @@ Ce projet a été réalisé dans le cadre du cours "IA Generative" (Projet IA G�
 * **Interface Interactive** : Dashboard développé avec **Streamlit** et **Plotly** incluant des cartes de proximité sémantique.
 * **Optimisation** : Système de **Caching** intelligent pour limiter les appels API et accélérer les réponses.
 
-## 🛠️ Architecture Technique
+## Architecture Technique
 
 Le projet suit une architecture modulaire :
 
@@ -20,7 +20,7 @@ Le projet suit une architecture modulaire :
 * `src/genai` : Client API pour Ollama, gestion du cache et Prompts.
 * `src/ui` : Interface utilisateur Streamlit.
 
-## 📦 Installation
+## Installation
 
 1.  **Cloner le projet :**
     ```bash
@@ -36,7 +36,7 @@ Le projet suit une architecture modulaire :
     * Assurez-vous qu'Ollama tourne en local (`http://localhost:11434`).
     * Modèle par défaut : `llama3.2:latest` (modifiable dans `client.py`).
 
-## ▶️ Utilisation
+## Utilisation
 
 Lancer l'application Streamlit depuis la racine du projet :
 

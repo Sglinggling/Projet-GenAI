@@ -13,7 +13,7 @@ def build_genai_prompt(user_profile: str, top3: pd.DataFrame) -> str:
     )
  
     return f"""
-Tu es un critique cinéma expert pour "CineMatch".
+Tu es un expert en recommandation de films.
 Analyse le profil et recommande ces 3 films.
  
 PROFIL :
@@ -23,8 +23,8 @@ FILMS :
 {films_txt}
  
 FORMAT (MARKDOWN) :
-1. Titre H1 (#) : "Analyse du Profil". (2 phrases max)
-2. Titre H1 (#) : "La Sélection".
+1. Titre H1 (#) : "Votre Profil". (2 phrases max)
+2. Titre H1 (#) : "Notre Sélection".
 3. Pour chaque film, Titre H3 (###) : Titre du film (Année).
 4. Sous chaque film : Un paragraphe explicatif clair et lisible.
 5. Pas de numérotation automatique.

@@ -209,7 +209,7 @@ def main():
     free_text = st.sidebar.text_area("Envie du moment", value="I want a dark psychological thriller...")
     mood = st.sidebar.selectbox("Ambiance", ["Suspense", "Drôle", "Triste", "Romantique", "Sombre", "Psychologique", "Inspirant", "Intense"])
     year_min, year_max = st.sidebar.slider("Époque", 1920, 2024, (1990, 2024))
-    preferred_genres = st.sidebar.multiselect("Genres", ["Thriller", "Drama", "Sci-Fi", "Action", "Horror"], ["Thriller"])
+    preferred_genres = st.sidebar.multiselect("Genres", ["Thriller", "Documentary", "Fantasy", "Mystery", "Family" "Drama", "Sci-Fi", "Action", "Horror"], ["Thriller"])
    
     st.sidebar.markdown("---")
     run_btn = st.sidebar.button("LANCER LA RECHERCHE", use_container_width=True)
@@ -248,7 +248,7 @@ def main():
             render_movie_card(row, i)
  
     # --- 2. IA EXPERT ---
-    st.markdown('<div class="section-title">L\'avis de l\'Expert IA</div>', unsafe_allow_html=True)
+    st.markdown('<div class="section-title">Un Avis d\'expert</div>', unsafe_allow_html=True)
     prompt = build_genai_prompt(user_profile, top3)
     with st.spinner("Analyse en cours..."):
         gen_text = generate_text(prompt)
