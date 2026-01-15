@@ -207,3 +207,12 @@ div.explain-wrap li {
     padding-left: 20px;
     text-transform: uppercase;
 }
+
+/* --- AJOUT POUR LE SCORE DE SIMILARITÉ --- */
+.match-score {
+    color: #46d369; /* Le vert iconique "Match" */
+    font-weight: 700;
+    font-size: 16px;
+    font-family: 'Lato', sans-serif;
+    letter-spacing: 0.5px;
+}

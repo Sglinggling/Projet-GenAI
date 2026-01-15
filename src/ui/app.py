@@ -67,17 +67,24 @@ def render_movie_card(row: pd.Series, rank: int):
     rating = row["IMDB_Rating"]
     overview = row["Overview"]
     director = row.get("Director", "")
- 
+    
+    # --- NOUVEAU : Calcul du pourcentage ---
+    raw_score = row.get("semantic_score", 0)
+    match_percentage = int(raw_score * 100)
+
     st.markdown(
         f"""
 <div class="movie-card">
   <div class="rank-pill">#{rank}</div>
   <div class="movie-title">{title} <span style="color:#888; font-size:0.8em; font-weight:normal;">({year})</span></div>
   <div style="font-size:13px; color:#aaa; margin-bottom:10px;">De {director}</div>
-  <div style="margin-bottom:15px;">
+  
+  <div style="margin-bottom:15px; display: flex; align-items: center; gap: 10px;">
+    <span class="match-score">{match_percentage}% Match</span>
     <span class="chip">{genre}</span>
     <span class="chip-rating">★ {rating}</span>
   </div>
+  
   <div style="font-size:14px; color:#bbb; line-height:1.5;">{overview[:200]}...</div>
 </div>
 """,
@@ -108,59 +115,95 @@ def analyze_semantic_breakdown(top3_df, model, free_text, mood, preferred_genres
  
  
 def render_target_chart(top3_df):
-    st.markdown('<div class="section-title">Carte de Proximité</div>', unsafe_allow_html=True)
-    st.caption("Visualisation de la distance sémantique. Plus c'est au centre, plus c'est parfait.")
- 
-    max_score = top3_df['semantic_score'].max()
-    min_score = top3_df['semantic_score'].min()
-    score_range = max_score - min_score
-    if score_range == 0: score_range = 1
- 
+    st.markdown('<div class="section-title">Radar de Pertinence</div>', unsafe_allow_html=True)
+    st.caption("Plus le film est proche du centre, plus il correspond à votre recherche.")
+
     fig = go.Figure()
- 
-    # --- CERCLES EN BLANC (Visibilité accrue) ---
-    rings = [0.2, 0.4, 0.6]
-    labels = ["Top Match", "Très proche", "Pertinent"]
-    for r, label in zip(rings, labels):
+
+    # --- 1. LE FOND ---
+    rings = [0.3, 0.6, 0.9]
+    for r in rings:
         fig.add_shape(type="circle", xref="x", yref="y", x0=-r, y0=-r, x1=r, y1=r,
-            line=dict(color="white", width=1, dash="dot"), opacity=0.4, fillcolor="rgba(0,0,0,0)")
-        fig.add_annotation(x=0, y=r, text=label, showarrow=False,
-            font=dict(size=12, color="#ddd"), yshift=8)
- 
-    # Centre
-    fig.add_trace(go.Scatter(x=[0], y=[0], mode='markers',
-        marker=dict(size=20, color='#ffffff', symbol='cross-thin', line=dict(width=3)),
-        hoverinfo='none'))
-    fig.add_annotation(x=0, y=0, text="VOUS", showarrow=False, yshift=-20, font=dict(color="white", size=12, family="Oswald"))
- 
-    angles = [90, 210, 330]
+            line=dict(color="#333", width=1), layer="below")
+    
+    # Croix centrale
+    fig.add_trace(go.Scatter(x=[-1.2, 1.2], y=[0, 0], mode="lines", line=dict(color="#222", width=1), hoverinfo="none"))
+    fig.add_trace(go.Scatter(x=[0, 0], y=[-1.2, 1.2], mode="lines", line=dict(color="#222", width=1), hoverinfo="none"))
+
+    # --- 2. LE CENTRE (VOUS) ---
+    fig.add_trace(go.Scatter(
+        x=[0], y=[0], mode='markers+text',
+        marker=dict(size=14, color='#ffffff', symbol='x', line=dict(width=2)),
+        text=["<b>VOUS</b>"], textposition="bottom center",
+        textfont=dict(color="#888", size=12),
+        hoverinfo='none'
+    ))
+
+    # --- 3. LES FILMS ---
+    angles_deg = [90, 330, 210]
+    radii = [0.4, 0.7, 0.8] 
+
     for i, (idx, row) in enumerate(top3_df.iterrows()):
-        score = row['semantic_score']
-        visual_radius = 0.15 + ((max_score - score) / score_range * 0.40) if score_range > 0.001 else 0.35
-       
-        theta_rad = np.radians(angles[i])
-        x = visual_radius * np.cos(theta_rad)
-        y = visual_radius * np.sin(theta_rad)
- 
+        angle = np.radians(angles_deg[i])
+        r = radii[i]
+        x = r * np.cos(angle)
+        y = r * np.sin(angle)
+        
         color = '#e50914' if i == 0 else ('#b20710' if i == 1 else '#82050b')
- 
+        
+        # Calcul du pourcentage
+        match_score = int(row['semantic_score'] * 100)
+
+        # A. BULLE (Chiffre)
         fig.add_trace(go.Scatter(
             x=[x], y=[y], mode='markers+text',
-            marker=dict(size=50, color=color, line=dict(width=3, color='white')), # TAILLE AUGMENTÉE
-            text=[f"#{i+1}"], textposition="middle center",
-            textfont=dict(color='white', size=20, family='Arial Black'),
-            name=f"#{i+1} {row['Series_Title']}",
-            hovertemplate=f"<b>{row['Series_Title']}</b><br>Score: {score:.4f}<extra></extra>"
+            marker=dict(size=35, color=color, line=dict(width=2, color='white')),
+            text=[str(i+1)], textposition="middle center",
+            textfont=dict(color='white', size=18, family="Oswald", weight="bold"),
+            hoverinfo='text',
+            hovertext=f"{row['Series_Title']}"
         ))
- 
+
+        # B. ÉTIQUETTE (Titre + Score)
+        # Positionnement intelligent pour éviter les collisions
+        if i == 0: # HAUT
+            x_anc, y_anc = "center", "bottom"
+            ay_offset = -28
+            ax_offset = 0
+        elif i == 1: # DROITE
+            x_anc, y_anc = "left", "middle"
+            ay_offset = 0
+            ax_offset = 28
+        else: # GAUCHE
+            x_anc, y_anc = "right", "middle"
+            ay_offset = 0
+            ax_offset = -28
+
+        # On ajoute le score en vert dans le texte
+        label_text = f"<b>{row['Series_Title']}</b> <span style='color:#46d369; font-size:12px'>({match_score}%)</span>"
+
+        fig.add_annotation(
+            x=x, y=y,
+            text=label_text,
+            showarrow=True,
+            arrowhead=0, arrowwidth=1, arrowcolor="#555",
+            ax=ax_offset, ay=ay_offset,
+            xanchor=x_anc, yanchor=y_anc,
+            bgcolor="rgba(10, 10, 10, 0.8)", # Fond sombre
+            bordercolor=color, borderwidth=1, borderpad=6,
+            font=dict(size=14, color="#eee", family="Lato")
+        )
+
+    # --- 4. LAYOUT ZOOMÉ ---
     fig.update_layout(
-        xaxis=dict(showgrid=False, zeroline=False, showticklabels=False, range=[-0.7, 0.7]),
-        yaxis=dict(showgrid=False, zeroline=False, showticklabels=False, range=[-0.7, 0.7], scaleanchor="x", scaleratio=1),
+        # Zoom ajusté ici (plus le chiffre est petit, plus c'est zoomé)
+        xaxis=dict(range=[-1.05, 1.05], showgrid=False, zeroline=False, showticklabels=False),
+        yaxis=dict(range=[-1.05, 1.05], showgrid=False, zeroline=False, showticklabels=False, scaleanchor="x", scaleratio=1),
         paper_bgcolor='rgba(0,0,0,0)',
         plot_bgcolor='rgba(0,0,0,0)',
-        margin=dict(l=20, r=20, t=20, b=20),
+        margin=dict(l=10, r=10, t=10, b=10),
         showlegend=False,
-        height=650, # GRANDE TAILLE DEMANDÉE
+        height=650
     )
     st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
  
