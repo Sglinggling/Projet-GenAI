@@ -77,7 +77,7 @@ def render_movie_card(row: pd.Series, rank: int):
 <div class="movie-card">
   <div class="rank-pill">#{rank}</div>
   <div class="movie-title">{title} <span style="color:#888; font-size:0.8em; font-weight:normal;">({year})</span></div>
-  <div style="font-size:13px; color:#aaa; margin-bottom:10px;">De {director}</div>
+  <div style="font-size:13px; color:#aaa; margin-bottom:10px;">By {director}</div>
   
   <div style="margin-bottom:15px; display: flex; align-items: center; gap: 10px;">
     <span class="match-score">{match_percentage}% Match</span>
