@@ -9,22 +9,18 @@ from src.genai.client import generate_text
 
 
 def main():
-    # ---- Data ----
+
     df_raw = load_raw_csv("data/raw/imdb_movies.csv")
     df = preprocess_movies(df_raw)
 
-    # ---- Model ----
     model = load_embedder()
 
-    # ---- User input (test) ----
     user_text = "I want a dark psychological thriller with intense atmosphere, mystery, and twists."
 
-    # ---- Reco ----
     top3 = recommend_top_k(df, model, user_text, k=3)
 
     print(top3[["Series_Title","Released_Year","Genre","IMDB_Rating","semantic_score"]])
 
-    # ---- Validation scores (optionnel) ----
     df_scored = compute_scores(df, model, user_text)
 
     print("\nTOP 5 pertinents")
@@ -35,7 +31,7 @@ def main():
     print(df_scored.sort_values("semantic_score", ascending=True)
           [["Series_Title","Genre","semantic_score"]].head(5))
 
-    # ---- GenAI (Ollama) ----
+    # OLLAMA PROMPT
     prompt = f"""
 Tu es un assistant cinéma. Réponds en français.
 

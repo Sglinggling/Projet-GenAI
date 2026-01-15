@@ -1,7 +1,7 @@
-/* --- IMPORTS FONTS --- */
+/* IMPORTS FONTS */
 @import url('https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;700&family=Lato:wght@300;400;700&display=swap');
 
-/* --- 1. CONFIGURATION GÉNÉRALE --- */
+/*1. CONFIGURATION GÉNÉRALE */
 .stApp {
     background-color: #141414;
     color: #e5e5e5;
@@ -14,13 +14,13 @@ h1, h2, h3 {
     letter-spacing: 0.5px;
 }
 
-/* --- 2. SIDEBAR (Renforcé) --- */
+/* --- 2. SIDEBAR */
 section[data-testid="stSidebar"] {
     background-color: #000000;
     border-right: 1px solid #222;
 }
 
-/* TITRES PRINCIPAUX SIDEBAR (ex: VOS CRITÈRES) */
+/* TITRES PRINCIPAUX SIDEBAR */
 section[data-testid="stSidebar"] h2 {
     color: #fff !important;
     font-family: 'Oswald', sans-serif !important;
@@ -31,7 +31,7 @@ section[data-testid="stSidebar"] h2 {
     padding-bottom: 10px;
 }
 
-/* LABELS DES INPUTS (ex: Décrivez votre envie...) */
+/* LABELS DES INPUTS */
 section[data-testid="stSidebar"] label {
     font-family: 'Oswald', sans-serif !important;
     font-size: 18px !important; /* PLUS GROS */
@@ -73,7 +73,7 @@ section[data-testid="stSidebar"] label {
     transform: scale(1.02);
 }
 
-/* --- 3. LOGO TEXTE --- */
+/*3. LOGO TEXTE */
 .logo-container {
     text-align: center;
     margin-bottom: 40px;
@@ -94,7 +94,7 @@ section[data-testid="stSidebar"] label {
     margin-top: 5px;
 }
 
-/* --- 4. CARTES DE FILMS --- */
+/*4. CARTES DE FILMS */
 .movie-card {
     background-color: #181818;
     padding: 20px;
@@ -141,7 +141,7 @@ section[data-testid="stSidebar"] label {
     font-weight: bold;
 }
 
-/* --- 5. L'AVIS EXPERT (Corrigé pour Markdown) --- */
+/* 5. L'AVIS EXPERT */
 .explain-wrap {
     background-color: #1a1a1a;
     padding: 40px;
@@ -152,7 +152,7 @@ section[data-testid="stSidebar"] label {
     margin-top: 20px;
 }
 
-/* TITRES H1 (ex: VOTRE PROFIL, NOTRE SÉLECTION) */
+/* LES TITRES H1 (ex: VOTRE PROFIL, NOTRE SÉLECTION) */
 div.explain-wrap h1 {
     color: #ffffff !important;
     font-size: 36px !important;
@@ -186,7 +186,7 @@ div.explain-wrap p {
     margin-bottom: 15px;
 }
 
-/* LISTES (Au cas où l'IA en génère) */
+/* LISTES QUE L'IA GÉNÈRE */
 div.explain-wrap ul, div.explain-wrap ol {
     margin-left: 20px;
     color: #ccc;
@@ -196,7 +196,7 @@ div.explain-wrap li {
     margin-bottom: 5px;
 }
 
-/* --- 6. TITRES SECTIONS --- */
+/* 6. TITRES SECTIONS */
 .section-title {
     font-size: 32px;
     font-family: 'Oswald', sans-serif;
@@ -208,7 +208,7 @@ div.explain-wrap li {
     text-transform: uppercase;
 }
 
-/* --- AJOUT POUR LE SCORE DE SIMILARITÉ --- */
+/* AJOUT POUR LE SCORE DE SIMILARITÉ */
 .match-score {
     color: #46d369; /* Le vert iconique "Match" */
     font-weight: 700;

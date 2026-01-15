@@ -1,4 +1,5 @@
 import sys
+import pickle
 from pathlib import Path
 import pandas as pd
 import streamlit as st
@@ -14,36 +15,46 @@ sys.path.append(str(ROOT_DIR))
 from src.config import configure_hf_ssl_bypass
 configure_hf_ssl_bypass()
  
-from src.data.load_data import load_raw_csv
-from src.data.preprocess import preprocess_movies
+# load_embedder pour encoder la requête utilisateur
 from src.nlp.embedder import load_embedder
-from src.recommender.recommend import compute_scores
 from src.genai.client import generate_text
- 
 from src.genai.prompt import build_genai_prompt
-
+ 
 @st.cache_resource
 def get_model():
     return load_embedder()
  
- 
 @st.cache_data
-def load_movies():
-    csv_path = ROOT_DIR / "src" / "data" / "raw" / "imdb_movies.csv"
-    df_raw = load_raw_csv(str(csv_path))
-    df = preprocess_movies(df_raw)
-   
+@st.cache_data
+def load_data_with_vectors():
+    """Charge le DataFrame et les Embeddings pré-calculés"""
+    pkl_path = ROOT_DIR / "src" / "data" / "processed" / "movies_with_embeddings.pkl"
+    
+    if not pkl_path.exists():
+        st.error("Fichier vecteurs introuvable ! Lancez 'python src/data/build_vectors.py'")
+        return None, None
+
+    with open(pkl_path, "rb") as fIn:
+        data = pickle.load(fIn)
+    
+    df = data['df']
+    embeddings = data['embeddings']
+    
     df["year"] = pd.to_numeric(df["Released_Year"], errors="coerce")
     df["IMDB_Rating"] = pd.to_numeric(df["IMDB_Rating"], errors="coerce")
-    df = df.dropna(subset=["year", "IMDB_Rating"]).copy()
+    
+    mask = df["year"].notna() & df["IMDB_Rating"].notna()
+    
+    df = df[mask].copy()
     df["year"] = df["year"].astype(int)
-    return df
- 
+    
+    embeddings = embeddings[mask]
+    
+    return df, embeddings
  
 def build_query_text(free_text: str, mood: str, preferred_genres: list[str]) -> str:
     preferred_txt = ", ".join(preferred_genres) if preferred_genres else "no specific genre"
     return f"{free_text.strip()}. Mood: {mood}. Preferred genres: {preferred_txt}."
- 
  
 def build_user_profile(
     free_text: str, mood: str, year_min: int, year_max: int, preferred_genres: list[str]
@@ -59,7 +70,6 @@ def load_css_file(css_file_path):
     with open(css_file_path, "r", encoding="utf-8") as f:
         st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
  
- 
 def render_movie_card(row: pd.Series, rank: int):
     title = row["Series_Title"]
     year = row["Released_Year"]
@@ -68,7 +78,6 @@ def render_movie_card(row: pd.Series, rank: int):
     overview = row["Overview"]
     director = row.get("Director", "")
     
-    # --- NOUVEAU : Calcul du pourcentage ---
     raw_score = row.get("semantic_score", 0)
     match_percentage = int(raw_score * 100)
 
@@ -91,7 +100,8 @@ def render_movie_card(row: pd.Series, rank: int):
         unsafe_allow_html=True,
     )
  
- 
+
+# Cette fonction recalcule seulement sur 3 films, donc c'est très rapide.
 def analyze_semantic_breakdown(top3_df, model, free_text, mood, preferred_genres):
     genre_text = ", ".join(preferred_genres) if preferred_genres else "General"
     emb_genre = model.encode(genre_text, convert_to_tensor=True)
@@ -113,24 +123,22 @@ def analyze_semantic_breakdown(top3_df, model, free_text, mood, preferred_genres
        
     return pd.DataFrame(data)
  
- 
+
+#Fonction pour le graphique radar
 def render_target_chart(top3_df):
     st.markdown('<div class="section-title">Radar de Pertinence</div>', unsafe_allow_html=True)
     st.caption("Plus le film est proche du centre, plus il correspond à votre recherche.")
 
     fig = go.Figure()
 
-    # --- 1. LE FOND ---
     rings = [0.3, 0.6, 0.9]
     for r in rings:
         fig.add_shape(type="circle", xref="x", yref="y", x0=-r, y0=-r, x1=r, y1=r,
             line=dict(color="#333", width=1), layer="below")
     
-    # Croix centrale
     fig.add_trace(go.Scatter(x=[-1.2, 1.2], y=[0, 0], mode="lines", line=dict(color="#222", width=1), hoverinfo="none"))
     fig.add_trace(go.Scatter(x=[0, 0], y=[-1.2, 1.2], mode="lines", line=dict(color="#222", width=1), hoverinfo="none"))
 
-    # --- 2. LE CENTRE (VOUS) ---
     fig.add_trace(go.Scatter(
         x=[0], y=[0], mode='markers+text',
         marker=dict(size=14, color='#ffffff', symbol='x', line=dict(width=2)),
@@ -139,7 +147,6 @@ def render_target_chart(top3_df):
         hoverinfo='none'
     ))
 
-    # --- 3. LES FILMS ---
     angles_deg = [90, 330, 210]
     radii = [0.4, 0.7, 0.8] 
 
@@ -150,11 +157,8 @@ def render_target_chart(top3_df):
         y = r * np.sin(angle)
         
         color = '#e50914' if i == 0 else ('#b20710' if i == 1 else '#82050b')
-        
-        # Calcul du pourcentage
         match_score = int(row['semantic_score'] * 100)
 
-        # A. BULLE (Chiffre)
         fig.add_trace(go.Scatter(
             x=[x], y=[y], mode='markers+text',
             marker=dict(size=35, color=color, line=dict(width=2, color='white')),
@@ -164,22 +168,19 @@ def render_target_chart(top3_df):
             hovertext=f"{row['Series_Title']}"
         ))
 
-        # B. ÉTIQUETTE (Titre + Score)
-        # Positionnement intelligent pour éviter les collisions
-        if i == 0: # HAUT
+        if i == 0:
             x_anc, y_anc = "center", "bottom"
             ay_offset = -28
             ax_offset = 0
-        elif i == 1: # DROITE
+        elif i == 1:
             x_anc, y_anc = "left", "middle"
             ay_offset = 0
             ax_offset = 28
-        else: # GAUCHE
+        else:
             x_anc, y_anc = "right", "middle"
             ay_offset = 0
             ax_offset = -28
 
-        # On ajoute le score en vert dans le texte
         label_text = f"<b>{row['Series_Title']}</b> <span style='color:#46d369; font-size:12px'>({match_score}%)</span>"
 
         fig.add_annotation(
@@ -189,14 +190,12 @@ def render_target_chart(top3_df):
             arrowhead=0, arrowwidth=1, arrowcolor="#555",
             ax=ax_offset, ay=ay_offset,
             xanchor=x_anc, yanchor=y_anc,
-            bgcolor="rgba(10, 10, 10, 0.8)", # Fond sombre
+            bgcolor="rgba(10, 10, 10, 0.8)", 
             bordercolor=color, borderwidth=1, borderpad=6,
             font=dict(size=14, color="#eee", family="Lato")
         )
 
-    # --- 4. LAYOUT ZOOMÉ ---
     fig.update_layout(
-        # Zoom ajusté ici (plus le chiffre est petit, plus c'est zoomé)
         xaxis=dict(range=[-1.05, 1.05], showgrid=False, zeroline=False, showticklabels=False),
         yaxis=dict(range=[-1.05, 1.05], showgrid=False, zeroline=False, showticklabels=False, scaleanchor="x", scaleratio=1),
         paper_bgcolor='rgba(0,0,0,0)',
@@ -206,8 +205,9 @@ def render_target_chart(top3_df):
         height=650
     )
     st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
- 
- 
+
+
+#Fonction pour le graphique à barres
 def render_breakdown_chart(breakdown_df):
     st.markdown('<div class="section-title">Pourquoi ces films ?</div>', unsafe_allow_html=True)
    
@@ -234,8 +234,7 @@ def render_breakdown_chart(breakdown_df):
         height=350
     )
     st.plotly_chart(fig, use_container_width=True, config={'displayModeBar': False})
- 
- 
+
 def main():
     st.set_page_config(page_title="CineMatch", layout="wide", page_icon="🍿")
    
@@ -243,21 +242,18 @@ def main():
     if css_path.exists():
         load_css_file(css_path)
  
-    df = load_movies()
+    df, embeddings = load_data_with_vectors()
     model = get_model()
  
-    # --- SIDEBAR ---
     st.sidebar.header("CRITÈRES")
-    # Plus de height fixée ici, le CSS s'en charge (min-height: 250px)
     free_text = st.sidebar.text_area("Envie du moment", value="I want a dark psychological thriller...")
     mood = st.sidebar.selectbox("Ambiance", ["Suspense", "Drôle", "Triste", "Romantique", "Sombre", "Psychologique", "Inspirant", "Intense"])
     year_min, year_max = st.sidebar.slider("Époque", 1920, 2024, (1990, 2024))
-    preferred_genres = st.sidebar.multiselect("Genres", ["Thriller", "Documentary", "Fantasy", "Mystery", "Family" "Drama", "Sci-Fi", "Action", "Horror"], ["Thriller"])
+    preferred_genres = st.sidebar.multiselect("Genres", ["Thriller", "Documentary", "Fantasy", "Mystery", "Family", "Drama", "Sci-Fi", "Action", "Horror"], ["Thriller"])
    
     st.sidebar.markdown("---")
     run_btn = st.sidebar.button("LANCER LA RECHERCHE", use_container_width=True)
  
-    # --- HEADER ---
     st.markdown("""
         <div class="logo-container">
             <div class="logo-text">
@@ -267,30 +263,39 @@ def main():
         </div>
     """, unsafe_allow_html=True)
  
-    if not run_btn:
+    if not run_btn or df is None:
         return
- 
-    # --- LOGIC ---
-    df_filtered = df[(df["year"] >= year_min) & (df["year"] <= year_max)].copy()
-    if preferred_genres:
-        mask = df_filtered["Genre"].apply(lambda g: any(pg.lower() in str(g).lower() for pg in preferred_genres))
-        if mask.sum() > 0: df_filtered = df_filtered[mask]
  
     query_text = build_query_text(free_text, mood, preferred_genres)
     user_profile = build_user_profile(free_text, mood, year_min, year_max, preferred_genres)
- 
-    df_scored = compute_scores(df_filtered, model, query_text)
-    top3 = df_scored.sort_values("semantic_score", ascending=False).head(3)
+    
+    # 1. Encodage de la requête utilisateur
+    query_embedding = model.encode(query_text, convert_to_tensor=True)
+    
+    # 2. Calcul des scores sur TOUTE la base
+    scores = util.cos_sim(query_embedding, embeddings)[0].cpu().numpy()
+    
+    # 3. Injection des scores dans le DataFrame global
+    df["semantic_score"] = scores
+    
+    # 4. Filtrage (Année, Genre) apres le calcul de score
+    df_filtered = df[(df["year"] >= year_min) & (df["year"] <= year_max)].copy()
+    
+    if preferred_genres:
+        mask = df_filtered["Genre"].apply(lambda g: any(pg.lower() in str(g).lower() for pg in preferred_genres))
+        if mask.sum() > 0: df_filtered = df_filtered[mask]
+    
+    top3 = df_filtered.sort_values("semantic_score", ascending=False).head(3)
+    
+    # Calcul du breakdown pour les graphiques (sur le top 3 seulement)
     breakdown_df = analyze_semantic_breakdown(top3, model, free_text, mood, preferred_genres)
  
-    # --- 1. AFFICHE ---
     st.markdown('<div class="section-title">À l\'affiche pour vous</div>', unsafe_allow_html=True)
     cols = st.columns(3, gap="medium")
     for i, (_, row) in enumerate(top3.iterrows(), start=1):
         with cols[i - 1]:
             render_movie_card(row, i)
  
-    # --- 2. IA EXPERT ---
     st.markdown('<div class="section-title">Un Avis d\'expert</div>', unsafe_allow_html=True)
     prompt = build_genai_prompt(user_profile, top3)
     with st.spinner("Analyse en cours..."):
@@ -298,18 +303,16 @@ def main():
    
     html_text = markdown.markdown(gen_text)
     st.markdown(f'<div class="explain-wrap">{html_text}</div>', unsafe_allow_html=True)
- 
-    # --- 3. DATAVIZ (ORDRE INVERSÉ + TARGET GÉANTE) ---
-    render_breakdown_chart(breakdown_df)  # Barres d'abord
-    render_target_chart(top3)             # Cible ensuite (Géante)
+
+    render_breakdown_chart(breakdown_df) 
+    render_target_chart(top3)
    
-    # --- 4. DETAILS TECHNIQUES ---
     st.markdown("<br><br>", unsafe_allow_html=True)
     st.divider()
     st.caption("Détails techniques")
  
-    with st.expander("Comment ça marche"):
-        st.write("L'application encode la requête utilisateur et les descriptions narratives dans les films avec SBERT, puis calcule une similarité cosinus pour obtenir un score d'affinité. Les trois meilleurs films sont proposés. La GenAI génère ensuite une justification et un profil cinéphile.")
+    with st.expander("Comment ça marche (Optimisé)"):
+        st.write("Base vectorielle pré-calculée (Pickle). Le système encode votre requête en 50ms et la compare instantanément aux vecteurs des 1000 films stockés.")
  
     with st.expander("Voir la requête sémantique"):
         st.code(query_text)
@@ -319,4 +322,3 @@ def main():
  
 if __name__ == "__main__":
     main()
- 

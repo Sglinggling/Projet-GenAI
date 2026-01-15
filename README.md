@@ -2,20 +2,23 @@
 
 **CineMatch** est un moteur de recommandation de films intelligent combinant **Recherche Sémantique (SBERT)** et **IA Générative (LLM)**. Contrairement aux filtres classiques, il comprend le sens de votre demande ("Je veux un thriller psychologique sombre...") pour trouver les meilleurs films et génère des critiques personnalisées.
 
-Ce projet a été réalisé dans le cadre du cours "IA Generative" (Projet IA Générative).
+Ce projet a été réalisé dans le cadre du cours "Data Engineering & AI".
 
 ## Fonctionnalités Clés
 
-* **Recherche Sémantique (RAG - Retrieval)** : Utilisation de `Sentence-BERT` pour transformer la demande utilisateur et les résumés de films en vecteurs et calculer la similarité (Cosine Similarity).
-* **Génération Augmentée (RAG - Generation)** : Utilisation d'un LLM local (**Ollama / Llama 3.2**) pour analyser le profil utilisateur et justifier les recommandations.
-* **Interface Interactive** : Dashboard développé avec **Streamlit** et **Plotly** incluant des cartes de proximité sémantique.
-* **Optimisation** : Système de **Caching** intelligent pour limiter les appels API et accélérer les réponses.
+* **Recherche Sémantique (RAG)** : Utilisation de `Sentence-BERT` pour transformer la demande utilisateur et les résumés de films en vecteurs.
+* **Architecture Optimisée** : Système de **Base Vectorielle locale (Pickle)**. Les vecteurs sont pré-calculés, ce qui rend la recherche instantanée (< 50ms) au lieu de recalculer à chaque requête.
+* **Génération Augmentée** : Utilisation d'un LLM local (**Ollama**) pour analyser le profil utilisateur et justifier les recommandations.
+* **Interface Interactive** : Dashboard **Streamlit** avec graphiques **Plotly** (Radar de pertinence zoomé, Cartes interactives).
+* **Caching** : Système de cache intelligent pour limiter les appels API.
 
 ## Architecture Technique
 
 Le projet suit une architecture modulaire :
 
-* `src/data` : Ingestion et prétraitement des métadonnées IMDB.
+* `src/data` :
+    * `build_vectors.py` : Script d'ingestion et de calcul des embeddings (à lancer une fois).
+    * `load_data.py` / `preprocess.py` : Nettoyage des données IMDB.
 * `src/nlp` : Gestion du modèle d'embedding (SBERT `all-MiniLM-L6-v2`).
 * `src/genai` : Client API pour Ollama, gestion du cache et Prompts.
 * `src/ui` : Interface utilisateur Streamlit.
@@ -24,7 +27,8 @@ Le projet suit une architecture modulaire :
 
 1.  **Cloner le projet :**
     ```bash
-    git clone https://github.com/Sglinggling/Projet-GenAI.git
+    git clone [https://github.com/Sglinggling/Projet-GenAI.git](https://github.com/Sglinggling/Projet-GenAI.git)
+    cd Projet-GenAI
     ```
 
 2.  **Installer les dépendances :**
@@ -32,13 +36,19 @@ Le projet suit une architecture modulaire :
     pip install -r requirements.txt
     ```
 
-3.  **Configurer Ollama (Local) :**
+3.  **Générer la base vectorielle (Obligatoire) :**
+    Cette étape va créer le fichier optimisé `movies_with_embeddings.pkl`.
+    ```bash
+    python src/data/build_vectors.py
+    ```
+
+4.  **Configurer Ollama (Local) :**
     * Assurez-vous qu'Ollama tourne en local (`http://localhost:11434`).
-    * Modèle par défaut : `llama3.2:latest` (modifiable dans `client.py`).
+    * Modèle par défaut : `llama3.2:latest`.
 
 ## Utilisation
 
-Lancer l'application Streamlit depuis la racine du projet :
+Une fois les vecteurs générés, lancez l'application :
 
 ```bash
 streamlit run src/ui/app.py

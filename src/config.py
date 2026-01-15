@@ -1,4 +1,3 @@
-# src/config.py
 import requests
 from huggingface_hub import configure_http_backend
 
